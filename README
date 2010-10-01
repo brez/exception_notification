@@ -1,4 +1,4 @@
-= Exception Notifier Plugin for Rails Redundancy Aware Fork
+= Exception Notifier Plugin for Rails Threshold Aware Fork
 
 Currently only for Rails 2.3 - essentially keeps track of exceptions by restricting the sending of exceptions to 30 per hour to avoid truckloads of the same exception getting sent out and more importantly not bringing the mail server to its knees. 
 
