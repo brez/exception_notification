@@ -53,21 +53,47 @@ class ExceptionNotifier
       prefix   = "#{@options[:email_prefix]}#{@kontroller.controller_name}##{@kontroller.action_name}"
       subject  = "#{prefix} (#{@exception.class}) #{@exception.message.inspect}"
 
-      mail(:to => @options[:exception_recipients], :from => @options[:sender_address], :subject => subject) do |format|
-        format.text { render "#{mailer_name}/exception_notification" }
+      unless full_throttle?
+        mail(:to => @options[:exception_recipients], :from => @options[:sender_address], :subject => subject) do |format|
+          format.text { render "#{mailer_name}/exception_notification" }
+        end
       end
+
     end
 
     private
-      
+
+      def full_throttle?
+        threshold_met?
+      end
+
+      def threshold_met?
+        $exception_throttle_max ||= 0
+        if $exception_throttle_max > 30
+          $exception_throttle_max = 0 if an_hour_has_passed?
+          return true
+        end
+        $exception_throttle_max += 1
+        false
+      end
+
+      def an_hour_has_passed?
+        $exception_time_stamp ||= Time.now
+        if $exception_time_stamp < Time.now - 3600
+          $exception_time_stamp = Time.now
+          return true
+        end
+        false
+      end
+
       def clean_backtrace(exception)
         Rails.respond_to?(:backtrace_cleaner) ?
           Rails.backtrace_cleaner.send(:filter, exception.backtrace) :
           exception.backtrace
       end
-      
+
       helper_method :inspect_object
-      
+
       def inspect_object(object)
         case object
         when Hash, Array
