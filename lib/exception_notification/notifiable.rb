@@ -54,26 +54,30 @@ private
     ![404, "404 Not Found"].include?(response.status) &&
     !full_throttle?
   end
-  
-  def full_throttle? 
-    if an_hour_has_passed? 
-      $exception_time_stamp = Time.now
-      false
-    else
-      if $exception_throttle_max == 10
-        $exception_throttle_max = 0
-        true
-      else
-        $exception_throttle_max += 1
-        false
-      end
+
+  def full_throttle?
+    threshold_met?
+  end
+
+  def threshold_met?
+    $exception_throttle_max ||= 0
+    if $exception_throttle_max > 30
+      $exception_throttle_max = 0 if an_hour_has_passed?
+      return true
     end
+    $exception_throttle_max += 1
+    false
   end
-  
+
   def an_hour_has_passed?
-    $exception_time_stamp < Time.now - 3600
+    $exception_time_stamp ||= Time.now
+    if $exception_time_stamp < Time.now - 3600
+      $exception_time_stamp = Time.now
+      return true
+    end
+    false
   end
-  
+
   def notify_about_exception(exception)
     deliverer = self.class.exception_data
     data = case deliverer
