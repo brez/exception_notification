@@ -50,7 +50,28 @@ private
   end
   
   def deliver_exception_notification?
-    !self.class.skip_exception_notifications? && ![404, "404 Not Found"].include?(response.status)
+    !self.class.skip_exception_notifications?         && 
+    ![404, "404 Not Found"].include?(response.status) &&
+    !full_throttle?
+  end
+  
+  def full_throttle? 
+    if an_hour_has_passed? 
+      $exception_time_stamp = Time.now
+      false
+    else
+      if $exception_throttle_max == 10
+        $exception_throttle_max = 0
+        true
+      else
+        $exception_throttle_max += 1
+        false
+      end
+    end
+  end
+  
+  def an_hour_has_passed?
+    $exception_time_stamp < Time.now - 3600
   end
   
   def notify_about_exception(exception)
