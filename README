@@ -1,5 +1,5 @@
 = Exception Notifier Plugin for Rails Redundancy Aware Fork
 
-Currently only for Rails 2.3 - essentially keeps track of exceptions by restricting the sending of exceptions to 10 per hour to avoid truckloads of the same exception getting sent out and more importantly not bringing the mail server to its knees. 
+Currently only for Rails 2.3 - essentially keeps track of exceptions by restricting the sending of exceptions to 30 per hour to avoid truckloads of the same exception getting sent out and more importantly not bringing the mail server to its knees. 
 
 Copyright (c) 2005 Jamis Buck, released under the MIT license
